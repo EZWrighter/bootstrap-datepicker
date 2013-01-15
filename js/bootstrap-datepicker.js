@@ -42,6 +42,7 @@
 		this.isInput = this.element.is('input');
 		this.component = this.element.is('.date') ? this.element.find('.add-on') : false;
 		this.hasInput = this.component && this.element.find('input').length;
+		this.forceFocus = false;
 		if(this.component && this.component.length === 0)
 			this.component = false;
 
@@ -192,19 +193,22 @@
 		},
 
 		show: function(e) {
-			this.picker.show();
-			this.height = this.component ? this.component.outerHeight() : this.element.outerHeight();
-			this.update();
-			this.place();
-			$(window).on('resize', $.proxy(this.place, this));
-			if (e ) {
-				e.stopPropagation();
-				e.preventDefault();
+			if(!this.forceFocus) {
+				this.picker.show();
+				this.height = this.component ? this.component.outerHeight() : this.element.outerHeight();
+				this.update();
+				this.place();
+				$(window).on('resize', $.proxy(this.place, this));
+				if (e ) {
+					e.stopPropagation();
+					e.preventDefault();
+				}
+				this.element.trigger({
+					type: 'show',
+					date: this.date
+				});
 			}
-			this.element.trigger({
-				type: 'show',
-				date: this.date
-			});
+			this.forceFocus = false;
 		},
 
 		hide: function(e){
@@ -601,6 +605,8 @@
 			if (element) {
 				element.change();
 				if (this.autoclose && (!which || which == 'date')) {
+					this.forceFocus = true;
+					setTimeout(function() { element.focus(); }, 0);
 					this.hide();
 				}
 			}
